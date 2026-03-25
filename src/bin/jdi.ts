@@ -1,16 +1,37 @@
 #!/usr/bin/env node
 
-// JDI — AI Coding Agent CLI
+// JDI — Claude Code 내장 AI 코딩 에이전트
+// 로그인 한 번으로 Claude Code의 전체 기능을 사용
 
-import { login, repl, oneshot } from '../cli.js';
+import { login, launch, showCredits, showUsage, showStatus } from '../cli.js';
 
 const args = process.argv.slice(2);
 const command = args[0];
 
 async function main() {
+  // === JDI 전용 명령어 ===
+
   // jdi login
   if (command === 'login') {
     await login();
+    return;
+  }
+
+  // jdi credits — 크레딧 잔액 조회
+  if (command === 'credits') {
+    await showCredits();
+    return;
+  }
+
+  // jdi usage — 사용량 조회
+  if (command === 'usage') {
+    await showUsage();
+    return;
+  }
+
+  // jdi status — 서버 상태 + 인증 확인
+  if (command === 'status') {
+    await showStatus();
     return;
   }
 
@@ -25,53 +46,52 @@ async function main() {
     const { createRequire } = await import('node:module');
     const require = createRequire(import.meta.url);
     const pkg = require('../../package.json');
-    console.log(pkg.version);
+    console.log(`jdi v${pkg.version} (Claude Code wrapper)`);
     return;
   }
 
-  // jdi "프롬프트" — one-shot mode
-  if (args.length > 0 && !command?.startsWith('-')) {
-    const prompt = args.join(' ');
-    await oneshot(prompt);
-    return;
-  }
-
-  // jdi — interactive REPL
-  await repl();
+  // === 나머지는 전부 Claude Code에 전달 ===
+  // jdi                    → claude (대화형 모드)
+  // jdi "분석해줘"          → claude "분석해줘" (원샷)
+  // jdi --model opus ...   → claude --model opus ... (모든 플래그 그대로)
+  await launch(args);
 }
 
 function printUsage() {
   console.log(`
-JDI — AI Coding Agent
+${'\x1b[1m\x1b[34m'}JDI${'\x1b[0m'} — Claude Code 내장 AI 코딩 에이전트
 
-사용법:
-  jdi                      대화형 모드 (REPL)
+${'사용법:'}
+  jdi                      Claude Code 대화형 모드
   jdi "프롬프트"            단일 프롬프트 실행
-  jdi login                서버 URL & API Key 설정
+  jdi login                서버 URL & API Key 설정 (최초 1회)
 
-옵션:
+${'플랫폼 명령어:'}
+  jdi credits              크레딧 잔액 조회
+  jdi usage                사용량 조회 (최근 30일)
+  jdi status               서버 연결 + 인증 상태 확인
+
+${'옵션:'}
   -h, --help               도움말
   -v, --version            버전 표시
 
-대화형 명령어:
-  /help                    도움말
-  /clear                   대화 기록 초기화
-  /model                   현재 모델 표시/변경
-  /config                  설정 정보 표시
-  /status                  컨텍스트 상태 (토큰 사용량)
-  /yolo                    권한 확인 건너뛰기 모드
-  /exit                    종료
+${'Claude Code 플래그 (그대로 전달):'}
+  jdi --model opus         모델 지정
+  jdi --verbose            상세 로그
+  jdi -p "프롬프트"         프롬프트 지정
+  jdi --help               Claude Code 도움말 (-- 없이)
 
-보안:
-  - 파일 쓰기/수정, 명령 실행 시 사전 확인 (y/N)
-  - 위험 명령 (rm -rf, sudo 등) 빨간 경고
-  - /yolo로 자동 승인 모드 전환 가능
-  - 도구 호출 최대 30회 제한 (무한 루프 방지)
+${'동작 방식:'}
+  1. jdi login 으로 서버 URL + API Key 설정 (1회)
+  2. 이후 jdi 실행 시 자동으로:
+     - ANTHROPIC_BASE_URL, ANTHROPIC_API_KEY 환경변수 주입
+     - Claude Code 로그인 우회 (.config.json 자동 설정)
+     - Claude Code CLI 실행 (전체 기능 사용 가능)
 
-예시:
+${'예시:'}
   jdi login
   cd ~/my-project
-  jdi "이 프로젝트를 분석해줘"
+  jdi "이 프로젝트의 버그를 찾아줘"
   jdi
 `);
 }
