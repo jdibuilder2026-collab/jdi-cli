@@ -7,10 +7,10 @@
 
 ```bash
 # GitHub에서 직접 설치 (자동 빌드됨)
-npm install -g github:YOUR_ORG/jdi-cli
+npm install -g github:jdibuilder2026-collab/jdi-cli
 
 # 또는 로컬에서 설치
-git clone https://github.com/YOUR_ORG/jdi-cli.git
+git clone https://github.com/jdibuilder2026-collab/jdi-cli.git
 cd jdi-cli
 npm install && npm run build
 npm link
