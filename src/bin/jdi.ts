@@ -56,9 +56,17 @@ JDI — AI Coding Agent
 대화형 명령어:
   /help                    도움말
   /clear                   대화 기록 초기화
-  /model                   현재 모델 표시
+  /model                   현재 모델 표시/변경
   /config                  설정 정보 표시
+  /status                  컨텍스트 상태 (토큰 사용량)
+  /yolo                    권한 확인 건너뛰기 모드
   /exit                    종료
+
+보안:
+  - 파일 쓰기/수정, 명령 실행 시 사전 확인 (y/N)
+  - 위험 명령 (rm -rf, sudo 등) 빨간 경고
+  - /yolo로 자동 승인 모드 전환 가능
+  - 도구 호출 최대 30회 제한 (무한 루프 방지)
 
 예시:
   jdi login

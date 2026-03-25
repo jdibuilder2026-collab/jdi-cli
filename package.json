@@ -10,10 +10,17 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/bin/jdi.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepare": "npm run build",
+    "postinstall": "npm run build 2>/dev/null || true"
   },
   "keywords": ["cli", "ai", "coding-agent", "claude"],
   "license": "MIT",
+  "files": [
+    "dist",
+    "src",
+    "tsconfig.json"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },

@@ -1,10 +1,14 @@
 // Tool Executor — tool_use 요청을 로컬에서 실행
+// 권한 확인, diff 표시, 위험 명령 경고 포함
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 import type { ContentBlock } from '../client.js';
 import { createInterface } from 'node:readline';
+import { classifyTool, requestPermission } from '../permission.js';
+import { renderDiff, renderToolDenied } from '../renderer.js';
+import { truncateToolResult } from '../context.js';
 
 const MAX_OUTPUT = 50000; // 50KB 출력 제한
 
@@ -14,24 +18,51 @@ export async function executeTool(
   cwd: string,
 ): Promise<{ content: string; is_error: boolean }> {
   try {
+    // 1. 권한 레벨 분류
+    const level = classifyTool(toolName, toolInput);
+
+    // 2. 쓰기/위험 도구는 유저 확인
+    if (level !== 'safe') {
+      const approved = await requestPermission(toolName, toolInput, level);
+      if (!approved) {
+        renderToolDenied(toolName);
+        return { content: '사용자가 실행을 거부했습니다.', is_error: true };
+      }
+    }
+
+    // 3. 도구 실행
+    let result: { content: string; is_error: boolean };
+
     switch (toolName) {
       case 'read_file':
-        return readFile(toolInput, cwd);
+        result = readFile(toolInput, cwd);
+        break;
       case 'write_file':
-        return writeFile(toolInput, cwd);
+        result = writeFile(toolInput, cwd);
+        break;
       case 'edit_file':
-        return editFile(toolInput, cwd);
+        result = editFile(toolInput, cwd);
+        break;
       case 'list_files':
-        return listFiles(toolInput, cwd);
+        result = listFiles(toolInput, cwd);
+        break;
       case 'search_files':
-        return searchFiles(toolInput, cwd);
+        result = searchFiles(toolInput, cwd);
+        break;
       case 'run_command':
-        return runCommand(toolInput, cwd);
+        result = runCommand(toolInput, cwd);
+        break;
       case 'ask_user':
-        return await askUser(toolInput);
+        result = await askUser(toolInput);
+        break;
       default:
-        return { content: `알 수 없는 도구: ${toolName}`, is_error: true };
+        result = { content: `알 수 없는 도구: ${toolName}`, is_error: true };
     }
+
+    // 4. tool result가 너무 길면 축약
+    result.content = truncateToolResult(result.content);
+
+    return result;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return { content: `도구 실행 에러: ${msg}`, is_error: true };
@@ -96,6 +127,19 @@ function writeFile(
   }
 
   const existed = fs.existsSync(filePath);
+
+  // Show diff for existing files
+  if (existed) {
+    const oldContent = fs.readFileSync(filePath, 'utf-8');
+    if (oldContent !== content) {
+      renderDiff(
+        String(input.path),
+        oldContent.split('\n').slice(0, 10).join('\n'),
+        content.split('\n').slice(0, 10).join('\n'),
+      );
+    }
+  }
+
   fs.writeFileSync(filePath, content, 'utf-8');
 
   const lines = content.split('\n').length;
@@ -126,6 +170,9 @@ function editFile(
       is_error: true,
     };
   }
+
+  // Show diff
+  renderDiff(String(input.path), oldText, newText);
 
   const count = raw.split(oldText).length - 1;
   const updated = raw.replace(oldText, newText);
@@ -163,7 +210,6 @@ function listFiles(
       return;
     }
 
-    // Sort: directories first, then files
     items.sort((a, b) => {
       if (a.isDirectory() && !b.isDirectory()) return -1;
       if (!a.isDirectory() && b.isDirectory()) return 1;
@@ -172,8 +218,6 @@ function listFiles(
 
     for (const item of items) {
       const relativePath = path.relative(cwd, path.join(dir, item.name));
-
-      // Skip common ignored dirs
       if (shouldIgnore(item.name, relativePath, gitignorePatterns)) continue;
 
       if (item.isDirectory()) {
@@ -222,7 +266,6 @@ function searchFiles(
       maxBuffer: 1024 * 1024,
     });
 
-    // Make paths relative
     const lines = output.split('\n').filter(Boolean);
     const relativized = lines.map(line => {
       if (line.startsWith(cwd)) {
@@ -290,7 +333,7 @@ async function askUser(
 
   const rl = createInterface({
     input: process.stdin,
-    output: process.stderr, // stderr로 출력 (stdout은 프로그램 출력용)
+    output: process.stderr,
   });
 
   return new Promise((resolve) => {
