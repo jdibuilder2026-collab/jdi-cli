@@ -7,10 +7,10 @@
     "jdi": "./dist/bin/jdi.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "npx tsc",
+    "dev": "npx tsc --watch",
     "start": "node dist/bin/jdi.js",
-    "lint": "tsc --noEmit",
+    "lint": "npx tsc --noEmit",
     "prepare": "npm run build"
   },
   "keywords": ["cli", "ai", "coding-agent", "claude", "claude-code"],
