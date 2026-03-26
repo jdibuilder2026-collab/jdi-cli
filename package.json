@@ -7,10 +7,10 @@
     "jdi": "./dist/bin/jdi.js"
   },
   "scripts": {
-    "build": "npx tsc",
-    "dev": "npx tsc --watch",
+    "build": "node node_modules/typescript/bin/tsc",
+    "dev": "node node_modules/typescript/bin/tsc --watch",
     "start": "node dist/bin/jdi.js",
-    "lint": "npx tsc --noEmit",
+    "lint": "node node_modules/typescript/bin/tsc --noEmit",
     "prepare": "npm run build"
   },
   "keywords": ["cli", "ai", "coding-agent", "claude", "claude-code"],
