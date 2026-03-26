@@ -5,11 +5,26 @@
 
 ## 설치
 
+### 1. Claude Code 설치 (필수)
+
 ```bash
-npm install -g github:jdibuilder2026-collab/jdi-cli
+npm install -g @anthropic-ai/claude-code
 ```
 
-Node.js 18 이상 필요. Claude Code CLI가 함께 설치됩니다.
+### 2. JDI 설치
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jdibuilder2026-collab/jdi-cli/main/install.sh | bash
+```
+
+또는 수동 설치:
+
+```bash
+git clone https://github.com/jdibuilder2026-collab/jdi-cli.git ~/.jdi/cli
+cd ~/.jdi/cli && npm install && npm link
+```
+
+Node.js 18 이상 필요.
 
 ## 설정 (최초 1회)
 
@@ -46,6 +61,7 @@ Claude Code의 **모든 기능** 그대로 사용 가능:
 - 이미지 분석
 - Git 작업
 - MCP 서버 연동
+- 스킬 / 에이전트 / 플러그인
 
 ## 플랫폼 명령어
 
@@ -73,21 +89,18 @@ jdi 실행 (매번)
 ## 업데이트
 
 ```bash
-npm install -g github:jdibuilder2026-collab/jdi-cli
+cd ~/.jdi/cli && git pull && npm install
 ```
-
-Claude Code도 함께 업데이트됩니다.
 
 ## vs Claude Code 직접 설치
 
 | 항목 | Claude Code 직접 | JDI |
 |------|-----------------|-----|
-| 설치 | npm install + 환경변수 수동 설정 + .config.json 수동 생성 | `npm i -g` + `jdi login` |
+| 설치 | npm install + 환경변수 수동 설정 + .config.json 수동 생성 | 설치 스크립트 + `jdi login` |
 | 로그인 | "3rd-party platform" 선택 필요 / .config.json 해킹 필요 | 자동 우회 |
 | 환경변수 | .zshrc/.bashrc에 직접 추가 | 자동 주입 (셸 오염 없음) |
-| Windows | Git Bash 필수 | PowerShell/CMD 가능 |
 | 크레딧 조회 | 웹 브라우저 필요 | `jdi credits` |
-| 업데이트 | npm update + 환경변수 재확인 | `npm i -g` 한 줄 |
+| 업데이트 | npm update + 환경변수 재확인 | `git pull && npm install` |
 
 ## License
 
