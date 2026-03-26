@@ -7,11 +7,10 @@
     "jdi": "./dist/bin/jdi.js"
   },
   "scripts": {
-    "build": "node node_modules/typescript/bin/tsc",
-    "dev": "node node_modules/typescript/bin/tsc --watch",
+    "build": "tsc",
+    "dev": "tsc --watch",
     "start": "node dist/bin/jdi.js",
-    "lint": "node node_modules/typescript/bin/tsc --noEmit",
-    "prepare": "npm run build"
+    "lint": "tsc --noEmit"
   },
   "keywords": ["cli", "ai", "coding-agent", "claude", "claude-code"],
   "license": "MIT",
@@ -25,10 +24,10 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.0",
-    "chalk": "^5.4.1",
-    "typescript": "^5.7.0"
+    "chalk": "^5.4.1"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
   }
 }
