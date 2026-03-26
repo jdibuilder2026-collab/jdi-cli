@@ -49,9 +49,8 @@ export async function launchClaude(args) {
     const claudeBin = findClaudeBinary();
     if (!claudeBin) {
         console.error(chalk.red('\n  Error: Claude Code CLI를 찾을 수 없습니다.\n'));
-        console.error(chalk.gray('  Claude Code가 JDI와 함께 설치되어야 합니다.'));
-        console.error(chalk.gray('  다시 설치해보세요:\n'));
-        console.error(chalk.cyan('    npm install -g github:jdibuilder2026-collab/jdi-cli\n'));
+        console.error(chalk.gray('  아래 명령어로 Claude Code를 먼저 설치하세요:\n'));
+        console.error(chalk.cyan('    npm install -g @anthropic-ai/claude-code\n'));
         return 1;
     }
     // 4. 실행 — claude 프로세스에 모든 I/O를 그대로 연결
